@@ -1,0 +1,65 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - PetsCareLove.Web</title>
+    <link rel="shortcut icon" href="favicon.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="~/assets/vendor/css/all.min.css">
+    <link href="~/assets/vendor/css/sharp-solid.min.css" rel="stylesheet" />
+    <link href="~/assets/vendor/css/sharp-regular.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/assets/vendor/css/jquery-ui.min.css">
+    <link rel="stylesheet" href="~/assets/vendor/css/OverlayScrollbars.min.css">
+    <link href="~/assets/vendor/css/jquery.datatables.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/assets/vendor/css/daterangepicker.css">
+    <link rel="stylesheet" href="~/assets/vendor/css/select2.min.css">
+    <link href="~/assets/vendor/css/dropzone.min.css" rel="stylesheet" />
+    <link href="~/assets/vendor/css/sweetalert2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/assets/vendor/css/bootstrap.min.css">
+    <link rel="stylesheet" href="~/assets/css/style.css">
+    <link rel="stylesheet" id="primaryColor" href="~/assets/css/blue-color.css">
+    <link rel="stylesheet" id="rtlStyle" href="#">
+</head>
+<body class="body-padding body-p-top light-theme">
+    <div class="preloader d-none">
+        <div class="loader">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </div>
+    <partial name="_Header" />
+    <partial name="_Sidebar" />
+    <div class="main-content">
+        @RenderBody()
+        <partial name="_Footer" />
+    </div>
+
+    <script src="~/assets/vendor/js/jquery-3.6.0.min.js"></script>
+    <script src="~/assets/vendor/js/jquery-ui.min.js"></script>
+    <script src="~/assets/vendor/js/jquery.overlayScrollbars.min.js"></script>
+    <script src="~/assets/vendor/js/jquery.datatables.min.js"></script>
+    <script src="~/assets/vendor/js/apexcharts.js"></script>
+    <script src="~/assets/vendor/js/moment.min.js"></script>
+    <script src="~/assets/vendor/js/daterangepicker.js"></script>
+    <script src="~/assets/vendor/js/select2.min.js"></script>
+    <script src="~/assets/vendor/js/jquery.uploader.min.js"></script>
+    <script src="~/assets/vendor/js/dropzone.min.js"></script>
+    <script src="~/assets/vendor/js/sweetalert2.all.min.js"></script>
+    <script src="~/assets/vendor/js/bootstrap.bundle.min.js"></script>
+    <script src="~/assets/js/dashboard.js"></script>
+    <script src="~/assets/js/main.js"></script>
+    <script src="~/assets/js/select2-init.js"></script>
+    <script src="~/assets/vendor/js/sweet-alert-init.js"></script>
+    <!-- for demo purpose -->
+    <script>
+        var rtlReady = $('html').attr('dir', 'ltr');
+        if (rtlReady !== undefined) {
+            localStorage.setItem('layoutDirection', 'ltr');
+        }
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+    @await RenderSectionAsync("Styles", required: false)
+</body>
+</html>

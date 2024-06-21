@@ -1,0 +1,82 @@
+﻿@model PetsCareLove.Web.ViewModels.PetViewModel
+@{
+    ViewData["Title"] = "Edit Pet";
+}
+
+<div class="dashboard-breadcrumb mb-25">
+    <h2>Editar Animal</h2>
+</div>
+<div class="row">
+    <div class="col-12">
+        <div class="panel">
+            <div class="panel-header">
+                <h5>File Uploader</h5>
+            </div>
+            <div class="panel-body">
+                <div class="row g-3">
+                    <div class="col-lg-4 col-md-5">
+                        <div class="card">
+                            <div class="card-header">Foto</div>
+                            <div class="card-body">
+                                <form action="/file-upload" class="dropzone dz-component" id="file-manager-upload"></form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-8 col-md-7">
+                        <div class="card component-jquery-uploader">
+                            <div class="card-header">
+                                Formulário
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <form class="row g-3" asp-action="EditPet" method="post">
+                                        <input type="hidden" id="foto-input" name="Photo" asp-for="Photo">
+                                        <div class="col-md-6">
+                                            <label for="inputPassword4" class="form-label">Nome</label>
+                                            <input type="text" id="inputPassword4" class="form-control" asp-for="Name">
+                                            <span asp-validation-for="Name" class="text-danger"></span>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label for="inputEmail4" class="form-label">Tutor</label>
+                                            <select id="inputState" class="form-select" asp-for="OwnerId" asp-items="@ViewBag.Owner">
+                                                <option value="" selected>Selecione...</option>
+                                            </select>
+                                            <span asp-validation-for="OwnerId" class="text-danger"></span>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="inputEmail4" class="form-label">Tipo Animal</label>
+                                            <select id="inputState" class="form-select" asp-for="TypeAnimalId" asp-items="@ViewBag.TipoAnimal">
+                                                <option selected>Selecione...</option>                                               
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="inputPassword4" class="form-label">Genero</label>
+                                            <select id="inputState" class="form-select" asp-for="GenderId" asp-items="@ViewBag.Genero">
+                                                <option selected>Selecione...</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="inputEmail4" class="form-label">Raça</label>
+                                            <select id="inputState" class="form-select" asp-for="BreedId" asp-items="@ViewBag.Raca">
+                                                <option selected>Selecione...</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="inputPassword4" class="form-label">Data Nascimento</label>
+                                            <input type="date" class="form-control" id="inputPassword4" asp-for="DateOfBirth">
+                                        </div>
+                                        <div class="col-12">
+                                            <button type="submit" class="btn btn-warning">Editar</button>
+                                            <button type="reset" class="btn btn-dark">Limpar</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

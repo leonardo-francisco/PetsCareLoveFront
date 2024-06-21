@@ -1,0 +1,123 @@
+﻿@model PetsCareLove.Web.ViewModels.InfoMedicalRecordViewModel
+@{
+    ViewData["Title"] = "Details Medical Record";
+}
+
+<div class="dashboard-breadcrumb mb-25">
+    <h2>Atendimento e Registro Médico</h2>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-4">
+        <div class="panel">
+            <div class="panel-body">
+                <div class="profile-sidebar">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="profile-sidebar-title">Informação</h5>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-icon btn-outline-primary" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fa-solid fa-ellipsis"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-sm dropdown-menu-sm-end">
+                                <li><a class="dropdown-item" href="@Url.Action("EditVeterinarian","Veterinarian", new{ id = @Model.Veterinarian.Id})"><i class="fa-regular fa-pen-to-square"></i> Editar Informação Veterinário</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="top">
+                        <div class="image-wrap">
+                            <div class="part-img rounded-circle overflow-hidden">
+                                <img src="@Model.Veterinarian.Photo" alt="admin">
+                            </div>
+                            <button class="image-change"><i class="fa-light fa-camera"></i></button>
+                        </div>
+                        <div class="part-txt">
+                            <h4 class="admin-name">@Model.Veterinarian.Name</h4>
+                        </div>
+                    </div>
+                    <div class="bottom">
+                        <h6 class="profile-sidebar-subtitle">Info Contato</h6>
+                        <ul>
+                            <li><span>Nome:</span>@Model.Veterinarian.Name</li>
+                            <li><span>Telefone:</span>@Model.Veterinarian.Phone</li>
+                            <li><span>E-mail:</span>@Model.Veterinarian.Email</li>
+                            <li><span>Crmv:</span>@Model.Veterinarian.Crmv</li>
+                            <li><span>Data Registro:</span>24 Nov 2022</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="row mb-25">
+            <div class="col-lg-4">
+                <div class="dashboard-top-box rounded-bottom panel-bg">
+                    <div class="image-wrap left">
+                        <div class="part-img rounded-circle overflow-hidden user-activity-title" style="width:40px;height:55px">
+                            <img src="@Model.Pet.Photo" alt="admin">
+                        </div>
+                    </div>
+                    <div class="right">
+                        <span class="text-primary">@Model.Pet.Name</span>
+                        <div >
+                            <span class="text-primary">@Model.Pet.TypeAnimalName</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-6 col-xs-12">
+                <div class="dashboard-top-box rounded-bottom panel-bg">
+                    <div class="image-wrap left">
+                        <div class="part-img rounded-circle overflow-hidden user-activity-title" style="width:40px;height:55px">
+                            <img src="@Model.Owner.Photo" alt="admin">
+                        </div>
+                    </div>
+                    <div class="right">
+                        <span class="text-primary">@Model.Owner.Name</span>
+                        <div >
+                            <span class="text-primary">@Model.Owner.Email</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="panel">
+            <div class="panel-header">
+                <h5>Registro Médico</h5>
+                <div class="dropdown">
+                    <a href="@Url.Action("DetailsVeterinarian","Veterinarian", new {id = Model.Veterinarian.Id})" class="btn btn-sm btn-primary">Voltar</a>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="user-activity">
+                    <ul>
+                        <li>
+                            <div class="left">                              
+                                <span class="user-activity-title">
+                                    <p>
+                                        Histórico: @Model.MedicalRecord.MedicalHistory
+                                    </p>
+                                </span>
+                                <span class="user-activity-date">
+                                    <p>Medicação Receitada: @Model.MedicalRecord.Medications</p>
+                                </span>
+                                <span class="user-activity-date">
+                                    <p>
+                                        Alergia: @Model.MedicalRecord.Allergies
+                                    </p>
+                                </span>
+                                <span class="user-activity-date">
+                                    <p>
+                                        Anotação: @Model.MedicalRecord.Notes
+                                    </p>
+                                </span>
+                            </div>                          
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+

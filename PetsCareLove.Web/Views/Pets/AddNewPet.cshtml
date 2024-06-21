@@ -1,0 +1,151 @@
+﻿@model PetsCareLove.Web.ViewModels.PetViewModel
+@{
+    ViewData["Title"] = "Add New Pet";
+}
+
+<div class="dashboard-breadcrumb mb-25">
+    <h2>Cadastrar Animal</h2>
+</div>
+<div class="row">
+    @if (ViewData["error"] != null)
+    {
+        <div class="alert alert-danger" id="error-alert">
+            Erro ao tentar cadastrar animal
+        </div>
+    }
+    <div class="col-12">
+        <div class="panel">
+            <div class="panel-header">
+                <h5>File Uploader</h5>
+            </div>
+            <div class="panel-body">
+                <div class="row g-3">
+                    <div class="col-lg-4 col-md-5">
+                        <div class="card">
+                            <div class="card-header">Foto</div>
+                            <div class="card-body">
+                                @* <form action="/file-upload" class="dropzone dz-component" id="file-manager-upload">
+                                    <input type="hidden" id="foto-input" name="Foto" asp-for="@Model.Photo">
+                                </form> *@
+                                <form class="dropzone dz-component" id="file-manager-upload">                            
+                                </form>
+                            </div>
+                        </div>
+                    </div>                   
+                    <div class="col-lg-8 col-md-7">
+                        <div class="card component-jquery-uploader">
+                            <div class="card-header">
+                                Formulário
+                            </div>                                              
+                            <div class="card-body">
+                                <div class="row">
+                                    <form class="row g-3" asp-action="AddNewPet" method="post">
+                                        <input type="hidden" id="foto-input" name="Photo" asp-for="Photo">
+                                        <div class="col-md-6">
+                                            <label for="inputPassword4" class="form-label">Nome</label>
+                                            <input type="text" id="inputPassword4" class="form-control" asp-for="Name">
+                                            <span asp-validation-for="Name" class="text-danger"></span>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label for="inputEmail4" class="form-label">Tutor</label>
+                                            <select id="inputState" class="form-select" asp-for="OwnerId" asp-items="@ViewBag.Owner">
+                                                <option value="" selected>Selecione...</option>
+                                            </select>
+                                            <span asp-validation-for="OwnerId" class="text-danger"></span>
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <label for="inputEmail4" class="form-label">Tipo Animal</label>
+                                            <select id="inputState" class="form-select" asp-for="TypeAnimalId" asp-items="@ViewBag.TipoAnimal">
+                                                <option value="" selected>Selecione...</option>                                               
+                                            </select>
+                                            <span asp-validation-for="TypeAnimalId" class="text-danger"></span>
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <label for="inputPassword4" class="form-label">Genero</label>
+                                            <select id="inputState" class="form-select" asp-for="GenderId" asp-items="@ViewBag.Genero">
+                                                <option value="" selected>Selecione...</option>
+                                            </select>
+                                            <span asp-validation-for="GenderId" class="text-danger"></span>
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <label for="inputEmail4" class="form-label">Raça</label>
+                                            <select id="inputState" class="form-select" asp-for="BreedId" asp-items="@ViewBag.Raca">
+                                                <option value="" selected>Selecione...</option>
+                                            </select>
+                                            <span asp-validation-for="BreedId" class="text-danger"></span>
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <label for="inputPassword4" class="form-label">Data Nascimento</label>
+                                            <input type="date" class="form-control" id="inputPassword4" asp-for="DateOfBirth">
+                                            <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+                                        </div> 
+                                        
+                                        <div class="col-12">
+                                            <button type="submit" class="btn btn-primary">Cadastrar</button>
+                                            <button type="reset" class="btn btn-dark">Limpar</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>                  
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var errorAlert = document.querySelector('.alert-danger');
+            if (errorAlert) {
+                setTimeout(function () {
+                    errorAlert.style.display = 'none';
+                }, 5000); // 5000ms = 5 segundos
+            }
+        });
+
+        Dropzone.autoDiscover = false;
+        var myDropzone = new Dropzone("#file-manager-upload", {
+            url: "/dummy-url", // URL fictícia para evitar o erro 404
+            autoProcessQueue: false, // Impede o envio automático do arquivo
+            paramName: "file", // Nome do parâmetro
+            maxFilesize: 2, // Tamanho máximo do arquivo em MB
+            init: function () {
+                this.on("addedfile", function (file) {
+                    // Criar uma URL temporária para o arquivo
+                    var imageUrl = URL.createObjectURL(file);
+
+                    // Atualizar o campo oculto com a URL da foto como string
+                    document.getElementById('foto-input').value = imageUrl.toString();
+
+                    // Exibir a URL da imagem no console para verificar
+                    console.log("URL da imagem:", imageUrl);
+                });
+
+                this.on("submit", function (event) {
+                    // Certifique-se de que o valor do campo oculto está sendo enviado
+                    var hiddenInputValue = document.getElementById('foto-input').value;
+                    console.log("Valor do campo oculto Photo:", hiddenInputValue);
+                });
+            }
+        });
+
+        // Adiciona um ouvinte de evento para garantir que o valor do campo oculto está correto ao enviar o formulário
+        document.getElementById('main-form').addEventListener('submit', function (event) {
+            var hiddenInputValue = document.getElementById('foto-input').value;
+            if (!hiddenInputValue) {
+                event.preventDefault(); // Evita o envio do formulário se o campo oculto estiver vazio
+                alert('Por favor, selecione uma imagem antes de enviar o formulário.');
+            } else {
+                console.log("Formulário enviado com valor do campo oculto Photo:", hiddenInputValue);
+            }
+        });
+    </script>
+}

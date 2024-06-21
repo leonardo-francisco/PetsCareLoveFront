@@ -1,0 +1,190 @@
+﻿@model IEnumerable<PetsCareLove.Web.ViewModels.ProductViewModel>
+
+@{
+    ViewData["Title"] = "Carrinho de Compras";
+}
+
+<div class="dashboard-breadcrumb mb-25">
+    <h2>Carrinho de Compras</h2>
+</div>
+<div class="row">
+    <div class="col-12">
+        <div class="panel">
+            <div class="panel-header">
+                <h5>Visão Geral</h5>
+            </div>
+            <div class="panel-body">
+                <div class="row g-3">
+                    <div class="col-lg-9">
+                        <div class="card mb-20">
+                            <div class="card-header">
+                                Produtos
+                            </div>
+                            <div class="card-body">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Foto</th>
+                                            <th>Nome do Produto</th>
+                                            <th>Quantidade</th>
+                                            <th>Preço</th>
+                                            <th>Ação</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model)
+                                        {
+                                            <tr data-id="@item.Id">
+                                                <td><img src="@item.Photo" alt="@item.Name" width="50" height="50"></td>
+                                                <td>@item.Name</td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-outline-secondary decrement">-</button>
+                                                    <span class="quantity">1</span>
+                                                    <button class="btn btn-sm btn-outline-secondary increment">+</button>
+                                                </td>
+                                                <td>R$ <span class="price">@item.Price</span></td>
+                                                <td>
+                                                    <button class="remove"><i class="fa-light fa-trash"></i></button>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="3"></td>
+                                            <td><strong>Total: R$ <span id="total-price">0.00</span></strong></td>
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="card mb-20">
+                            <div class="card-header">
+                                Cupom de Desconto
+                            </div>
+                            <div class="card-body">
+                                <form class="row gy-2 gx-3 align-items-center">
+                                    <div class="col-auto">
+                                        <label class="visually-hidden" for="coupon-code">Código do Cupom</label>
+                                        <input type="text" class="form-control" id="coupon-code" placeholder="Insira o código do cupom">
+                                    </div>
+                                    <div class="col-auto">
+                                        <button type="button" id="apply-coupon" class="btn btn-primary">Aplicar</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="card mb-20">
+                            <div class="card-header">
+                                Resumo
+                            </div>
+                            <div class="card-body">
+                                <form class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="summary-total" class="form-label">Total</label>
+                                        <input type="text" class="form-control" id="summary-total" value="R$ 0.00" readonly>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="discount" class="form-label">Desconto</label>
+                                        <input type="text" class="form-control" id="discount" value="R$ 0.00" readonly>
+                                    </div>
+                                    <div class="col-12">
+                                        <label for="final-total" class="form-label">Total Final</label>
+                                        <input type="text" class="form-control" id="final-total" value="R$ 0.00" readonly>
+                                    </div>
+                                    <div class="col-12">
+                                        <button type="button" id="proceed-to-payment" class="btn btn-primary">Seguir para Pagamento</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Função para atualizar o preço total
+            function updateTotal() {
+                let total = 0;
+                $('tbody tr').each(function () {
+                    const quantity = parseInt($(this).find('.quantity').text());
+                    const price = parseFloat($(this).find('.price').text().replace('R$ ', ''));
+                    total += quantity * price;
+                });
+                $('#total-price').text(total.toFixed(2));
+
+                // Atualiza o resumo
+                const summaryTotal = total.toFixed(2);
+                const discount = parseFloat($('#discount').val().replace('R$ ', ''));
+                const finalTotal = (summaryTotal - discount).toFixed(2);
+                $('#summary-total').val('R$ ' + summaryTotal);
+                $('#final-total').val('R$ ' + finalTotal);
+            }
+
+            // Inicializa o total
+            updateTotal();
+
+            // Incrementa a quantidade
+            $('body').on('click', '.increment', function () {
+                const $row = $(this).closest('tr');
+                let quantity = parseInt($row.find('.quantity').text());
+                quantity++;
+                $row.find('.quantity').text(quantity);
+                updateTotal();
+            });
+
+            // Decrementa a quantidade
+            $('body').on('click', '.decrement', function () {
+                const $row = $(this).closest('tr');
+                let quantity = parseInt($row.find('.quantity').text());
+                if (quantity > 1) {
+                    quantity--;
+                    $row.find('.quantity').text(quantity);
+                    updateTotal();
+                }
+            });
+
+            // Remove um produto do carrinho
+            $('body').on('click', '.remove', function () {
+                const $row = $(this).closest('tr');
+                const productId = $row.attr('data-id');
+
+                // Envia a requisição para remover o produto do carrinho
+                $.ajax({
+                    url: '/Ecommerce/RemoveFromCart', // URL do seu método no Controller
+                    type: 'POST',
+                    data: { id: productId },
+                    success: function () {
+                        $row.remove(); // Remove a linha da tabela localmente
+                        updateTotal(); // Atualiza o total na página
+                    },
+                    error: function () {
+                        alert('Erro ao remover o produto do carrinho.');
+                    }
+                });
+            });
+
+            // Aplica o cupom de desconto
+            $('#apply-coupon').click(function () {
+                const couponCode = $('#coupon-code').val();
+                // Simulando aplicação do cupom (substituir pelo código real)
+                const discount = 10.00; // Suponhamos um desconto fixo de R$ 10.00
+                $('#discount').val('R$ ' + discount.toFixed(2));
+                updateTotal();
+            });
+
+            // Seguir para pagamento
+            $('#proceed-to-payment').click(function () {
+                window.location.href = '@Url.Action("Checkout", "Ecommerce")';
+            });
+        });
+    </script>
+}
