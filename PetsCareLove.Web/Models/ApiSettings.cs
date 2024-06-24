@@ -2,6 +2,7 @@
 {
     public class ApiSettings
     {
+        public string AuthUrl { get; set; }
         public string PetsUrl { get; set; }
         public string OwnersUrl { get; set; }
         public string VeterinariansUrl { get; set; }

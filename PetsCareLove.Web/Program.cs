@@ -15,10 +15,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-    
+
 builder.Services.AddRazorPages()
     .AddRazorRuntimeCompilation();
 
+builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession();
 
 builder.Services.Configure<ApiSettings>(builder.Configuration.GetSection("ApiSettings"));
@@ -36,6 +37,7 @@ builder.Services.AddControllers()
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("MailSettings"));
 builder.Services.AddScoped<EmailService>();
 
+builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<PetService>();
 builder.Services.AddScoped<OwnerService>();
 builder.Services.AddScoped<VeterinarianService>();
@@ -57,12 +59,13 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseSession();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Dashboard}/{action=Index}/{id?}");
+    pattern: "{controller=Authentication}/{action=Login}/{id?}");
 
 app.Run();

@@ -66,9 +66,9 @@ namespace PetsCareLove.Web.Controllers
             }
 
             // Simples estrutura de armazenamento de carrinho na sessão
-            var cart = HttpContext.Session.GetObjectFromJson<List<ProductViewModel>>("Cart") ?? new List<ProductViewModel>();
+            var cart = HttpContext.Session.Get<List<ProductViewModel>>("Cart") ?? new List<ProductViewModel>();
             cart.Add(product);
-            HttpContext.Session.SetObjectAsJson("Cart", cart);
+            HttpContext.Session.Set("Cart", cart);
 
             return Json(new { count = cart.Count });
         }
@@ -77,14 +77,14 @@ namespace PetsCareLove.Web.Controllers
         public IActionResult RemoveFromCart(Guid id)
         {
             // Lógica para remover o produto do carrinho na sessão
-            var cart = HttpContext.Session.GetObjectFromJson<List<ProductViewModel>>("Cart") ?? new List<ProductViewModel>();
+            var cart = HttpContext.Session.Get<List<ProductViewModel>>("Cart") ?? new List<ProductViewModel>();
 
             // Encontra o produto pelo ID e remove
             var productToRemove = cart.FirstOrDefault(p => p.Id == id);
             if (productToRemove != null)
             {
                 cart.Remove(productToRemove);
-                HttpContext.Session.SetObjectAsJson("Cart", cart);
+                HttpContext.Session.Set("Cart", cart);
             }
 
             return Ok(); // Retorna um status de sucesso
@@ -92,7 +92,7 @@ namespace PetsCareLove.Web.Controllers
 
         public async Task<IActionResult> ShoppCart()
         {
-            var cart = HttpContext.Session.GetObjectFromJson<List<ProductViewModel>>("Cart") ?? new List<ProductViewModel>();
+            var cart = HttpContext.Session.Get<List<ProductViewModel>>("Cart") ?? new List<ProductViewModel>();
             return View(cart);
         }
     }

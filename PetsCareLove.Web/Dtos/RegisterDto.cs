@@ -3,6 +3,7 @@
     public class RegisterDto : UserDto
     {
         public string Name { get; set; }
-        public string Role { get; set; }
-    }
+        public string? Role { get; set; }
+		public Guid RoleId { get; set; }
+	}
 }

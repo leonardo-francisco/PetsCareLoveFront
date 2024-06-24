@@ -1,21 +1,27 @@
 ﻿using FluentValidation;
 using FluentValidation.AspNetCore;
 using FluentValidation.Results;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using PetsCareLove.Web.Dtos;
+using PetsCareLove.Web.Models;
 using PetsCareLove.Web.Services;
 using PetsCareLove.Web.Validators;
+using System.Text.Json;
 
 namespace PetsCareLove.Web.Controllers
 {
     public class AuthenticationController : Controller
     {
         private readonly EmailService _emailService;
+        private readonly AuthService _authService;   
 
-        public AuthenticationController(EmailService emailService)
+        public AuthenticationController(EmailService emailService, AuthService authService)
         {
             _emailService = emailService;
-        }
+			_authService = authService;      
+		}
 
         public IActionResult Login()
         {
@@ -25,7 +31,7 @@ namespace PetsCareLove.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(LoginDto loginDto)
         {
-            var validator = new UserDtoValidator();
+            var validator = new LoginDtoValidator();
             ValidationResult result = validator.Validate(loginDto);
 
             if (!result.IsValid)
@@ -34,29 +40,52 @@ namespace PetsCareLove.Web.Controllers
                 return View(loginDto);
             }
 
-            return View();
+            var response = await _authService.LoginAsync(loginDto);
+            if (response.IsSuccessStatusCode)
+            {
+                var responseBody = await response.Content.ReadAsStringAsync();
+                var loginResponse = JsonSerializer.Deserialize<LoginResponse>(responseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                HttpContext.Session.SetString("User", JsonSerializer.Serialize(loginResponse.User));
+                HttpContext.Session.SetString("Token", JsonSerializer.Serialize(loginResponse.Token));
+                return RedirectToAction("Index", "Dashboard");
+            }
+
+            var errorResponseBody = await response.Content.ReadAsStringAsync();
+            var errorResponse = JsonSerializer.Deserialize<ErrorResponse>(errorResponseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            TempData["error"] = errorResponse.Message.ToString();
+            return View(loginDto);
         }
 
-        public IActionResult Register()
+        public async Task<IActionResult> Register()
         {
+            await FillDropDown();
             return View();
         }
 
         [HttpPost]
-        public async Task<IActionResult> Register(RegisterDto registerDto)
+        public async Task<IActionResult> Register(UserDto userDto)
         {
-            var validator = new RegisterDtoValidator();
-            ValidationResult result = validator.Validate(registerDto);
+            await FillDropDown();
+
+            var validator = new UserDtoValidator();
+            ValidationResult result = validator.Validate(userDto);
 
             if (!result.IsValid)
             {
                 result.AddToModelState(ModelState, null);
-                return View(registerDto);
+                return View(userDto);
             }
+			var response = await _authService.RegisterAsync(userDto);
+            if (response.IsSuccessStatusCode)
+            {
+				await _emailService.SendEmailAsync(userDto.Email, "Bem Vindo");
+                TempData["success"] = "Usuário registrado com sucesso";
+                return View(userDto);  
+			}
 
-            await _emailService.SendEmailAsync("leonardosfrancisco@gmail.com","Bem Vindo");
-
-            return View();
+            TempData["error"] = "Erro ao registrar usuário";
+            return View(userDto);
         }
 
         public IActionResult ForgotPassword()
@@ -67,7 +96,7 @@ namespace PetsCareLove.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> ForgotPassword(LoginDto loginDto)
         {
-            var validator = new UserDtoValidator();
+            var validator = new LoginDtoValidator();
             ValidationResult result = validator.Validate(loginDto);
 
             if (!result.IsValid)
@@ -76,7 +105,27 @@ namespace PetsCareLove.Web.Controllers
                 return View(loginDto);
             }
 
-            return View();
+            var response = await _authService.RecoveryPasswordAsync(loginDto);
+            if (response.IsSuccessStatusCode)
+            {               
+                TempData["success"] = "Senha alterada com sucesso";
+                return View(loginDto);
+            }
+
+            TempData["error"] = "Erro ao atualizar a senha";
+            return View(loginDto);
+        }
+
+        [HttpPost]
+        public IActionResult Logout()
+        {         
+            HttpContext.Session.Clear();          
+            return RedirectToAction("Login", "Authentication");
+        }
+
+        private async Task FillDropDown()
+        {
+            ViewBag.Roles = new SelectList(await _authService.GetAllRolesAsync(), "Id", "Name");            
         }
     }
 }
