@@ -1,0 +1,120 @@
+﻿@model PetsCareLove.Web.ViewModels.TrainerViewModel
+@{
+    ViewData["Title"] = "Add New Trainer";
+}
+
+<div class="dashboard-breadcrumb mb-25">
+    <h2>Cadastrar Adestrador</h2>
+</div>
+<div class="row">
+    @if (TempData["error"] != null)
+    {
+        <div class="alert alert-danger" id="error-alert">
+            @TempData["error"]
+        </div>
+    }
+    <div class="col-12">
+        <div class="panel">
+            <div class="panel-header">
+                <h5>File Uploader</h5>
+            </div>
+            <div class="panel-body">
+                <div class="row g-3">
+                    <div class="col-lg-4 col-md-5">
+                        <div class="card">
+                            <div class="card-header">Foto</div>
+                            <div class="card-body">
+                                @* <form action="/file-upload" class="dropzone dz-component" id="file-manager-upload"></form> *@
+                                <form class="dropzone dz-component" id="file-manager-upload">
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-8 col-md-7">
+                        <div class="card component-jquery-uploader">
+                            <div class="card-header">
+                                Formulário
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <form class="row g-3" asp-action="AddNewTrainer" method="post">
+                                        <input type="hidden" id="foto-input" name="Photo" asp-for="Photo">
+                                        <div class="col-12">
+                                            <label for="inputAddress" class="form-label">Nome</label>
+                                            <input type="text" class="form-control" asp-for="Name" placeholder="Fulano">
+                                            <span asp-validation-for="Name" class="text-danger"></span>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="inputEmail4" class="form-label">E-mail</label>
+                                            <input type="text" class="form-control" asp-for="Email" placeholder="fulano@@dominio.com.br">
+                                            <span asp-validation-for="Email" class="text-danger"></span>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="inputPassword4" class="form-label">Telefone</label>
+                                            <input type="text" class="form-control" asp-for="Phone" placeholder="(xx)xxxxx-xxxx">
+                                            <span asp-validation-for="Phone" class="text-danger"></span>
+                                        </div>                                       
+                                        <div class="col-12">
+                                            <button type="submit" class="btn btn-primary">Cadastrar</button>
+                                            <button type="reset" class="btn btn-dark">Limpar</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var errorAlert = document.querySelector('.alert-danger');
+            if (errorAlert) {
+                setTimeout(function () {
+                    errorAlert.style.display = 'none';
+                }, 5000); // 5000ms = 5 segundos
+            }
+        });
+
+        Dropzone.autoDiscover = false;
+        var myDropzone = new Dropzone("#file-manager-upload", {
+            url: "/Trainer/Upload",
+            autoProcessQueue: true, // Processa o envio automaticamente
+            paramName: "file",
+            maxFilesize: 2, // Tamanho máximo do arquivo em MB
+            init: function () {
+                this.on("success", function (file, response) {
+                    if (response.success) {
+                        // Atualizar o campo oculto com o caminho da foto
+                        document.getElementById('foto-input').value = response.filePath;
+
+                        // Exibir o caminho da imagem no console para verificar
+                        console.log("Caminho da imagem:", response.filePath);
+                    } else {
+                        console.error("Upload failed:", response.error);
+                    }
+                });
+
+                this.on("error", function (file, response) {
+                    console.error("Upload error:", response);
+                });
+            }
+        });
+
+        // Adiciona um ouvinte de evento para garantir que o valor do campo oculto está correto ao enviar o formulário
+        document.getElementById('main-form').addEventListener('submit', function (event) {
+            var hiddenInputValue = document.getElementById('foto-input').value;
+            if (!hiddenInputValue) {
+                event.preventDefault(); // Evita o envio do formulário se o campo oculto estiver vazio
+                alert('Por favor, selecione uma imagem antes de enviar o formulário.');
+            } else {
+                console.log("Formulário enviado com valor do campo oculto Photo:", hiddenInputValue);
+            }
+        });
+    </script>
+}
+

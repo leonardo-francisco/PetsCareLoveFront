@@ -1,0 +1,164 @@
+﻿@model IEnumerable<PetsCareLove.Web.ViewModels.TrainerViewModel>
+@{
+    ViewData["Title"] = "Index Trainer";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+}
+
+<div class="dashboard-breadcrumb mb-25">
+    <h2>Adestradores</h2>
+    <div class="input-group dashboard-filter">
+        <input type="text" class="form-control" name="basic" id="dashboardFilter" readonly>
+        <label for="dashboardFilter" class="input-group-text"><i class="fa-light fa-calendar-days"></i></label>
+    </div>
+</div>
+@if (TempData["success"] != null)
+{
+    <div id="success-alert" class="alert alert-success">
+        @TempData["success"]
+    </div>
+}
+<div class="row g-4">
+    <div class="col-12">
+        <div class="panel">
+            <div class="panel-header">
+                <h5>Todos Veterinários</h5>
+                <div class="btn-box d-flex flex-wrap gap-2">
+                    <div id="tableSearch"></div>
+                    <div class="btn-box">
+                        <a href="@Url.Action("AddNewTrainer","Trainer")" class="btn btn-sm btn-primary"><i class="fa-light fa-plus"></i> Cadastrar</a>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="product-table-quantity">
+                    <ul>
+                        <li class="text-white">All (23)</li>
+                        <li>Published (19)</li>
+                        <li>Draft (05)</li>
+                        <li>Trush (05)</li>
+                    </ul>
+                </div>
+                <table class="table table-dashed table-hover digi-dataTable all-product-table table-striped" id="allProductTable">
+                    <thead>
+                        <tr>
+                            <th class="no-sort">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="markAllProduct">
+                                </div>
+                            </th>
+                            <th>Foto</th>
+                            <th>Nome</th>
+                            <th>E-mail</th>                            
+                            <th>Telefone</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox">
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="table-product-card">
+                                        <div class="part-img">
+                                            <img src="@item.Photo" alt="Image">
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>@item.Name</td>
+                                <td>@item.Email</td>                               
+                                <td>@item.Phone</td>
+                                <td>
+                                    <div class="btn-box">
+                                        <a type="button" href="@Url.Action("DetailsTrainer","Trainer", new{ id = @item.Id})"><i class="fa-light fa-eye"></i></a>
+                                        <a type="button" href="@Url.Action("EditTrainer","Trainer", new{ id = @item.Id})"><i class="fa-light fa-pen"></i></a>
+                                        <button class="delete-btn" data-id="@item.Id"><i class="fa-light fa-trash"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                <div class="table-bottom-control"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var successAlert = document.querySelector('.alert-success');
+            if (successAlert) {
+                setTimeout(function () {
+                    successAlert.style.display = 'none';
+                }, 5000); // 5000ms = 5 segundos
+            }
+        });
+
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll(".delete-btn").forEach(function (button) {
+                button.addEventListener("click", function () {
+                    var vetId = this.getAttribute("data-id");
+
+                    Swal.fire({
+                        title: "Tem certeza?",
+                        text: "Você não poderá reverter isso!",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonClass: "btn btn-sm btn-primary",
+                        cancelButtonClass: "btn btn-sm btn-danger",
+                        confirmButtonText: "Sim, exclua!",
+                        cancelButtonText: "Não",
+                        buttonsStyling: false,
+                        showCloseButton: true,
+                        closeButtonHtml: "<i class='fa-light fa-xmark'></i>",
+                        customClass: {
+                            closeButton: 'btn btn-sm btn-icon btn-danger',
+                        },
+                    }).then(function (result) {
+                        if (result.value) {
+                            // Fazer a requisição AJAX para excluir o pet
+                            $.ajax({
+                                url: '/Trainer/DeleteTrainer/' + vetId,
+                                type: 'DELETE',
+                                success: function (response) {
+                                    Swal.fire({
+                                        title: "Excluído!",
+                                        text: "Seu registro foi excluído.",
+                                        icon: "success",
+                                        confirmButtonClass: "btn btn-sm btn-primary",
+                                        buttonsStyling: false
+                                    }).then(function () {
+                                        // Atualizar a página após a exclusão bem-sucedida
+                                        location.reload();
+                                    });
+                                },
+                                error: function (xhr, status, error) {
+                                    Swal.fire({
+                                        title: "Erro!",
+                                        text: "Ocorreu um erro ao excluir o registro.",
+                                        icon: "error",
+                                        confirmButtonClass: "btn btn-sm btn-primary",
+                                        buttonsStyling: false
+                                    });
+                                }
+                            });
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+}
+
+
+
