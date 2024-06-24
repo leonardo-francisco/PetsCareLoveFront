@@ -1,4 +1,4 @@
-﻿namespace PetsCareLove.Web.Models
+﻿namespace PetsCareLove.Web.Response
 {
     public class ErrorResponse
     {

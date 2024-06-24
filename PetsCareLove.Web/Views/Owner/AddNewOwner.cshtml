@@ -6,10 +6,10 @@
 <div class="dashboard-breadcrumb mb-25">
     <h2>Cadastrar Tutor</h2>
 </div>
-@if (ViewData["error"] != null)
+@if (TempData["error"] != null)
 {
     <div class="alert alert-danger" id="error-alert">
-        Erro ao tentar cadastrar tutor
+        @TempData["error"]
     </div>
 }
 <div class="row">
@@ -82,26 +82,25 @@
 
         Dropzone.autoDiscover = false;
         var myDropzone = new Dropzone("#file-manager-upload", {
-            url: "/dummy-url", // URL fictícia para evitar o erro 404
-            autoProcessQueue: false, // Impede o envio automático do arquivo
-            paramName: "file", // Nome do parâmetro
+            url: "/Owner/Upload",
+            autoProcessQueue: true, // Processa o envio automaticamente
+            paramName: "file",
             maxFilesize: 2, // Tamanho máximo do arquivo em MB
             init: function () {
-                this.on("addedfile", function (file) {
-                    // Criar uma URL temporária para o arquivo
-                    var imageUrl = URL.createObjectURL(file);
+                this.on("success", function (file, response) {
+                    if (response.success) {
+                        // Atualizar o campo oculto com o caminho da foto
+                        document.getElementById('foto-input').value = response.filePath;
 
-                    // Atualizar o campo oculto com a URL da foto como string
-                    document.getElementById('foto-input').value = imageUrl.toString();
-
-                    // Exibir a URL da imagem no console para verificar
-                    console.log("URL da imagem:", imageUrl);
+                        // Exibir o caminho da imagem no console para verificar
+                        console.log("Caminho da imagem:", response.filePath);
+                    } else {
+                        console.error("Upload failed:", response.error);
+                    }
                 });
 
-                this.on("submit", function (event) {
-                    // Certifique-se de que o valor do campo oculto está sendo enviado
-                    var hiddenInputValue = document.getElementById('foto-input').value;
-                    console.log("Valor do campo oculto Photo:", hiddenInputValue);
+                this.on("error", function (file, response) {
+                    console.error("Upload error:", response);
                 });
             }
         });

@@ -6,10 +6,10 @@
 <div class="dashboard-breadcrumb mb-25">
     <h2>Editar Tutor</h2>
 </div>
-@if (ViewData["error"] != null)
+@if (TempData["error"] != null)
 {
     <div class="alert alert-danger" id="error-alert">
-        Erro ao tentar editar tutor
+        @TempData["error"]
     </div>
 }
 <div class="row">

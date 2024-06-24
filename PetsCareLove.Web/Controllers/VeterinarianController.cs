@@ -1,9 +1,11 @@
 ﻿using FluentValidation.AspNetCore;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
+using PetsCareLove.Web.Response;
 using PetsCareLove.Web.Services;
 using PetsCareLove.Web.Validators;
 using PetsCareLove.Web.ViewModels;
+using System.Text.Json;
 
 namespace PetsCareLove.Web.Controllers
 {
@@ -13,14 +15,15 @@ namespace PetsCareLove.Web.Controllers
         private readonly OwnerService _ownerService;
         private readonly PetService _petService;
         private readonly EmployeeService _employeeService;
+        private readonly PhotoService _photoService;
 
-        public VeterinarianController(VeterinarianService veterinarianService, OwnerService ownerService, PetService petService, EmployeeService employeeService)
+        public VeterinarianController(VeterinarianService veterinarianService, OwnerService ownerService, PetService petService, EmployeeService employeeService, PhotoService photoService)
         {
             _veterinarianService = veterinarianService;
             _ownerService = ownerService;
             _petService = petService;
             _employeeService = employeeService;
-
+            _photoService = photoService;
         }
 
         public async Task<IActionResult> Index()
@@ -103,11 +106,29 @@ namespace PetsCareLove.Web.Controllers
 
             if (response.IsSuccessStatusCode)
             {
-                TempData["success"] = "Veterinário criado com sucesso";
-                return RedirectToAction("Index", "Veterinarian");
+                var vetResponse = await DeserializeResponseAsync<VeterinarianResponse>(response);
+                if (vetResponse == null)
+                {
+                    TempData["error"] = "Falha ao criar veterinário";
+                    return View(veterinarianViewModel);
+                }
+
+                var imagePathFromApi = GetApiImagePath(vetResponse.Veterinarian.Id);
+                var localImagePath = GetLocalImagePath(vetResponse.Veterinarian.Id);
+
+                if (await DownloadAndSaveImageAsync(imagePathFromApi, localImagePath))
+                {
+                    TempData["success"] = "Veterinário criado com sucesso";
+                    return RedirectToAction("Index", "Veterinarian");
+                }
+                else
+                {
+                    TempData["error"] = "Falha ao salvar a imagem do veterinário";
+                    return View(veterinarianViewModel);
+                }
             }
 
-            ViewData["error"] = "Falha ao criar veterinário";
+            TempData["error"] = "Falha ao criar veterinário";
             return View(veterinarianViewModel);
         }
 
@@ -137,22 +158,30 @@ namespace PetsCareLove.Web.Controllers
                 return RedirectToAction("Index", "Veterinarian");
             }
 
-            ViewData["error"] = "Falha ao editar veterinário";
+            TempData["error"] = "Falha ao editar veterinário";
             return View(veterinarianViewModel);
         }
 
         [HttpDelete]
         public async Task<IActionResult> DeleteVeterinarian(Guid id)
         {
-            try
+            var vet = await _veterinarianService.GetVeterinarianByIdAsync(id);
+
+            if (vet != null)
             {
-                await _veterinarianService.DeleteVeterinarianAsync(id);
-                return Ok();
+                if (!string.IsNullOrEmpty(vet.Photo))
+                {
+                    string photoPath = Path.Combine("wwwroot", vet.Photo.TrimStart('/'));
+                    if (System.IO.File.Exists(photoPath))
+                    {
+                        System.IO.File.Delete(photoPath);
+                    }
+                }
+
+                await _veterinarianService.DeleteVeterinarianAsync(vet.Id);
             }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+
+            return Ok();
         }
 
         public async Task<IActionResult> MedicalRecordsByAppointment(Guid id)
@@ -170,5 +199,76 @@ namespace PetsCareLove.Web.Controllers
 
             return View(viewModel);
         }
+
+        #region Imagem
+        [HttpPost]
+        public async Task<IActionResult> Upload(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                return Json(new { success = false, error = "No file uploaded." });
+
+            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
+            //var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
+            var uniqueFileName = $"{Guid.NewGuid()}_{file.FileName}";
+            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+            try
+            {
+                if (!Directory.Exists(uploadsFolder))
+                {
+                    Directory.CreateDirectory(uploadsFolder);
+                }
+
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(fileStream);
+                }
+
+                var imagePath = $"https://localhost:7031/uploads/{uniqueFileName}";
+                return Json(new { success = true, filePath = imagePath });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, error = ex.Message });
+            }
+        }
+
+        // Helper method to deserialize response
+        private async Task<T> DeserializeResponseAsync<T>(HttpResponseMessage response)
+        {
+            var responseBody = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<T>(responseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        }
+
+        // Helper method to get the image path from the API
+        private string GetApiImagePath(Guid veterinarianId)
+        {
+            return $"https://localhost:7088/images/veterinarian/{veterinarianId}.jpg";
+        }
+
+        // Helper method to get the local image path
+        private string GetLocalImagePath(Guid veterinarianId)
+        {
+            string directoryPath = Path.Combine("wwwroot", "images", "veterinarian");
+            Directory.CreateDirectory(directoryPath);
+            return Path.Combine(directoryPath, $"{veterinarianId}.jpg");
+        }
+
+        // Helper method to download and save the image
+        private async Task<bool> DownloadAndSaveImageAsync(string sourceUrl, string destinationPath)
+        {
+            try
+            {
+                await _photoService.DownloadAndSaveImageAsync(sourceUrl, destinationPath);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                // _logger.LogError(ex, "Error downloading or saving image.");
+                return false;
+            }
+        }
+        #endregion
     }
 }

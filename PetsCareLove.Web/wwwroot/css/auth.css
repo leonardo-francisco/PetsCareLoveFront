@@ -114,3 +114,32 @@ button {
     button:hover {
         background-color: #0056b3;
     }
+
+/* Estilo base para os alerts */
+.alert {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000; /* Certifica-se de que os alerts aparecem acima de outros elementos */
+    width: 300px;
+    padding: 15px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    font-size: 16px;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilo para o alert de sucesso */
+#success-alert {
+    color: #155724;
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+}
+
+/* Estilo para o alert de erro */
+#error-alert {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}

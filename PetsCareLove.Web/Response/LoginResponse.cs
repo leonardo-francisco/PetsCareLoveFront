@@ -1,6 +1,6 @@
 ﻿using PetsCareLove.Web.Dtos;
 
-namespace PetsCareLove.Web.Models
+namespace PetsCareLove.Web.Response
 {
     public class LoginResponse
     {

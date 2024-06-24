@@ -43,6 +43,7 @@ builder.Services.AddScoped<OwnerService>();
 builder.Services.AddScoped<VeterinarianService>();
 builder.Services.AddScoped<EmployeeService>();
 builder.Services.AddScoped<EcommerceService>();
+builder.Services.AddScoped<PhotoService>();
 
 var app = builder.Build();
 

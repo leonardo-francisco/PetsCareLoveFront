@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using PetsCareLove.Web.Dtos;
-using PetsCareLove.Web.Models;
+using PetsCareLove.Web.Response;
 using PetsCareLove.Web.Services;
 using PetsCareLove.Web.Validators;
 using System.Text.Json;
@@ -84,7 +84,9 @@ namespace PetsCareLove.Web.Controllers
                 return View(userDto);  
 			}
 
-            TempData["error"] = "Erro ao registrar usuário";
+            var errorResponseBody = await response.Content.ReadAsStringAsync();
+            var errorResponse = JsonSerializer.Deserialize<ErrorResponse>(errorResponseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            TempData["error"] = errorResponse.Message.ToString();
             return View(userDto);
         }
 
@@ -112,7 +114,9 @@ namespace PetsCareLove.Web.Controllers
                 return View(loginDto);
             }
 
-            TempData["error"] = "Erro ao atualizar a senha";
+            var errorResponseBody = await response.Content.ReadAsStringAsync();
+            var errorResponse = JsonSerializer.Deserialize<ErrorResponse>(errorResponseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            TempData["error"] = errorResponse.Message.ToString();
             return View(loginDto);
         }
 
